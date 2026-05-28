@@ -6,18 +6,129 @@ It is not GUI automation. The agent does not click PyCharm or IntelliJ like a hu
 
 ## Quick Start
 
-1. Open your project in PyCharm, IntelliJ IDEA, WebStorm, or another JetBrains IDE 2025.2+.
+This is the fastest path from zero to an agent that can use PyCharm/IntelliJ project semantics.
+
+### 1. Enable JetBrains MCP
+
+1. Open your target project in PyCharm, IntelliJ IDEA, WebStorm, GoLand, Rider, CLion, or another JetBrains IDE 2025.2+.
 2. Open `Settings | Tools | MCP Server`.
 3. Check **Enable MCP Server**.
-4. Click **Copy Stdio Config**.
-5. Paste the copied config into your agent:
-   - Codex: add it to `~/.codex/config.toml` using the shape in `examples/codex-config.toml`.
-   - Cursor: adapt `examples/cursor.mcp.json`.
-   - Claude Desktop: adapt `examples/claude-desktop.json`.
-   - Claude Code: see `examples/claude-code.md`.
-   - Trae or similar MCP clients: adapt `examples/trae.mcp.json`.
-6. Restart the agent/client.
-7. Ask the agent to list JetBrains MCP tools or inspect the current project with JetBrains MCP.
+4. Keep the settings page open. You will use either **Copy Stdio Config** or **Copy SSE Config** from this page.
+
+### 2. Choose Stdio or SSE
+
+Prefer **Stdio** for desktop and CLI agents. It launches a JetBrains-provided Java runner and is the most reliable option for Codex, Claude Desktop, Claude Code, Cursor, Trae, and similar local clients.
+
+Use **SSE** only when your client explicitly supports SSE MCP servers. Some clients expose a generic `url` field but treat it as streamable HTTP, which is not the same thing as JetBrains' `/sse` endpoint.
+
+### 3. Configure Your Agent
+
+#### Codex
+
+Copy the JetBrains **Stdio Config**, then adapt it into `~/.codex/config.toml`.
+
+Minimal shape:
+
+```toml
+[mcp_servers.jetbrains]
+command = 'D:\APP\pycharm\PyCharm 2025.3\jbr\bin\java.exe'
+args = [
+  '-classpath',
+  '<classpath copied from JetBrains>',
+  'com.intellij.mcpserver.stdio.McpStdioRunnerKt'
+]
+startup_timeout_sec = 30
+tool_timeout_sec = 120
+
+[mcp_servers.jetbrains.env]
+IJ_MCP_SERVER_PORT = '64342'
+```
+
+Use your own copied `command`, `args`, and `IJ_MCP_SERVER_PORT`. See `examples/codex-config.toml`.
+
+Verify:
+
+```powershell
+codex mcp list
+codex mcp get jetbrains
+```
+
+Then restart Codex or open a new session.
+
+#### Cursor
+
+Use the copied JetBrains **Stdio Config** in Cursor's MCP config. Start from `examples/cursor.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "jetbrains": {
+      "type": "stdio",
+      "command": "D:\\APP\\pycharm\\PyCharm 2025.3\\jbr\\bin\\java",
+      "args": [
+        "-classpath",
+        "<classpath copied from JetBrains>",
+        "com.intellij.mcpserver.stdio.McpStdioRunnerKt"
+      ],
+      "env": {
+        "IJ_MCP_SERVER_PORT": "64342"
+      }
+    }
+  }
+}
+```
+
+Restart Cursor after saving the config. If Cursor's MCP UI explicitly supports SSE, `examples/cursor-sse.mcp.json` is also available.
+
+#### Claude Desktop
+
+Use `examples/claude-desktop.json` as the shape for `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "jetbrains": {
+      "command": "D:\\APP\\pycharm\\PyCharm 2025.3\\jbr\\bin\\java",
+      "args": [
+        "-classpath",
+        "<classpath copied from JetBrains>",
+        "com.intellij.mcpserver.stdio.McpStdioRunnerKt"
+      ],
+      "env": {
+        "IJ_MCP_SERVER_PORT": "64342"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop after editing the file.
+
+#### Claude Code
+
+If your Claude Code version supports CLI MCP registration, use the same Stdio command:
+
+```bash
+claude mcp add jetbrains \
+  -e IJ_MCP_SERVER_PORT=64342 \
+  -- "D:\APP\pycharm\PyCharm 2025.3\jbr\bin\java" \
+  -classpath "<classpath copied from JetBrains>" \
+  com.intellij.mcpserver.stdio.McpStdioRunnerKt
+```
+
+See `examples/claude-code.md`. Restart Claude Code after adding the server.
+
+#### Trae and Similar MCP Clients
+
+Use the same Stdio JSON pattern as Cursor. Start from `examples/trae.mcp.json`, replace the Java path, classpath, and port with the values copied from your JetBrains IDE, then restart the client.
+
+### 4. Verify Tools Are Available
+
+Ask the agent:
+
+```text
+List the available JetBrains MCP tools and tell me whether the server is connected.
+```
 
 Expected tool names include:
 
@@ -30,6 +141,20 @@ mcp__jetbrains__search_in_files_by_text
 ```
 
 If `resources/list` is empty or unsupported, that is not a failure. JetBrains MCP mainly exposes tools.
+
+### 5. Try a Real IDE-Assisted Task
+
+Once tools are visible, ask something like:
+
+```text
+Use JetBrains MCP to inspect this project, list current file problems, and summarize the run configurations. Do not modify files.
+```
+
+For code changes, ask the agent to use the ai2ide workflow:
+
+```text
+Use ai2ide: before changing this API, inspect symbol info and file problems with JetBrains MCP, then make the smallest safe edit and verify it.
+```
 
 ## What This Repo Contains
 
@@ -44,17 +169,6 @@ If `resources/list` is empty or unsupported, that is not a failure. JetBrains MC
 - JetBrains MCP Server enabled in `Settings | Tools | MCP Server`.
 - An MCP-capable agent/client.
 - A trusted local project. ai2ide assumes high-trust local development; JetBrains MCP can expose tools that read, write, format, refactor, run commands, or execute IDE run configurations.
-
-## Recommended Setup
-
-1. Open your project in a JetBrains IDE.
-2. Go to `Settings | Tools | MCP Server`.
-3. Enable the MCP Server.
-4. Prefer **Copy Stdio Config** for desktop/CLI agents.
-5. Paste/adapt the config for your agent from `examples/`.
-6. Restart the agent so it reloads MCP servers.
-
-The Stdio config copied from JetBrains is the most reliable option for current desktop agents. The SSE config is useful for clients that explicitly support SSE. Do not assume a client option named `url` supports SSE; some clients treat it as streamable HTTP instead.
 
 ## Codex Setup
 
