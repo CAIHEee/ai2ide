@@ -4,6 +4,33 @@ ai2ide is a local workflow/plugin for letting AI coding agents use JetBrains IDE
 
 It is not GUI automation. The agent does not click PyCharm or IntelliJ like a human. Instead, the IDE exposes project-indexed tools such as symbol lookup, file problems, refactoring, formatting, run configurations, file search, and terminal execution over MCP.
 
+## Quick Start
+
+1. Open your project in PyCharm, IntelliJ IDEA, WebStorm, or another JetBrains IDE 2025.2+.
+2. Open `Settings | Tools | MCP Server`.
+3. Check **Enable MCP Server**.
+4. Click **Copy Stdio Config**.
+5. Paste the copied config into your agent:
+   - Codex: add it to `~/.codex/config.toml` using the shape in `examples/codex-config.toml`.
+   - Cursor: adapt `examples/cursor.mcp.json`.
+   - Claude Desktop: adapt `examples/claude-desktop.json`.
+   - Claude Code: see `examples/claude-code.md`.
+   - Trae or similar MCP clients: adapt `examples/trae.mcp.json`.
+6. Restart the agent/client.
+7. Ask the agent to list JetBrains MCP tools or inspect the current project with JetBrains MCP.
+
+Expected tool names include:
+
+```text
+mcp__jetbrains__get_file_problems
+mcp__jetbrains__get_symbol_info
+mcp__jetbrains__rename_refactoring
+mcp__jetbrains__reformat_file
+mcp__jetbrains__search_in_files_by_text
+```
+
+If `resources/list` is empty or unsupported, that is not a failure. JetBrains MCP mainly exposes tools.
+
 ## What This Repo Contains
 
 - `skills/ide-assisted-coding/SKILL.md`: Codex skill instructions for deciding when to use CLI tools and when to use JetBrains MCP.
