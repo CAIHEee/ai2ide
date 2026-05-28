@@ -1,0 +1,35 @@
+{
+  "name": "ai2ide",
+  "version": "0.1.0",
+  "description": "Use JetBrains IDE semantic capabilities from Codex through official MCP tools.",
+  "author": {
+    "name": "ai2ide"
+  },
+  "license": "MIT",
+  "keywords": [
+    "codex",
+    "jetbrains",
+    "mcp",
+    "ide",
+    "coding"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "ai2ide",
+    "shortDescription": "Use JetBrains IDE semantics while coding in Codex.",
+    "longDescription": "ai2ide teaches Codex when to combine normal CLI workflows with JetBrains official MCP tools for symbol context, IDE inspections, build feedback, formatting, and high-trust IDE-assisted changes. It does not automate the IDE user interface or ship a custom JetBrains plugin in v1.",
+    "developerName": "ai2ide",
+    "category": "Productivity",
+    "capabilities": [
+      "Code",
+      "Write",
+      "MCP"
+    ],
+    "defaultPrompt": [
+      "Use ai2ide to inspect and safely modify this project.",
+      "Use JetBrains MCP semantics before changing this API.",
+      "Diagnose this coding issue with CLI and IDE checks."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

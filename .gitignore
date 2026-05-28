@@ -1,0 +1,22 @@
+# OS/editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Local runtime/cache output
+.cache/
+.tmp/
+tmp/
+logs/
+*.log
+
+# Dependency folders
+node_modules/
+.venv/
+venv/
+__pycache__/
+
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example

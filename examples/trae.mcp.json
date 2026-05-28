@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "jetbrains": {
+      "type": "stdio",
+      "command": "D:\\APP\\pycharm\\PyCharm 2025.3\\jbr\\bin\\java",
+      "args": [
+        "-classpath",
+        "PASTE_THE_CLASSPATH_COPIED_FROM_JETBRAINS_HERE",
+        "com.intellij.mcpserver.stdio.McpStdioRunnerKt"
+      ],
+      "env": {
+        "IJ_MCP_SERVER_PORT": "64342"
+      }
+    }
+  }
+}

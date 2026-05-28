@@ -1,0 +1,4 @@
+interface:
+  display_name: "IDE Assisted Coding"
+  short_description: "Use JetBrains IDE semantics while coding in Codex."
+  default_prompt: "Use $ide-assisted-coding to modify this project with JetBrains IDE semantic checks."
